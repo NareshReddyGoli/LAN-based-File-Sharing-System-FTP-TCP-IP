@@ -1,0 +1,16 @@
+# Build output
+build/
+dist/
+
+# Logs
+*.log
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.class
+
+# OS
+Thumbs.db
+Desktop.ini
