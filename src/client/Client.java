@@ -10,7 +10,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.RoundRectangle2D;
 import java.io.*;
-import java.net.Socket;
+import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -347,6 +347,7 @@ public class Client {
                 return false;
             }
 
+            System.out.println("Connecting to " + hostname + "...");
             socket = new Socket(hostname, Protocol.PORT);
             socket.setSoTimeout(Protocol.SOCKET_TIMEOUT_MS);
             out = new PrintWriter(socket.getOutputStream(), true);
