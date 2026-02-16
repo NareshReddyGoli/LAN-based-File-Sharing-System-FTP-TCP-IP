@@ -55,8 +55,8 @@ public final class Protocol {
         // Use "localhost" for local testing.
 
         HOSTNAMES.put("faculty1", "LAPTOP-UHBD48G0"); // Change to "FACULTY1-PC" for production
-        HOSTNAMES.put("faculty2", "HP");
-        HOSTNAMES.put("faculty3", "FACULTY3-PC");
+        HOSTNAMES.put("faculty2", "MrunalHPi5");
+        HOSTNAMES.put("faculty3", "DESKTOP-35DPGU5");
         HOSTNAMES.put("faculty4", "FACULTY4-PC");
         HOSTNAMES.put("faculty5", "FACULTY5-PC");
 
@@ -80,6 +80,24 @@ public final class Protocol {
      */
     public static Set<String> getAllFacultyUsernames() {
         return HOSTNAMES.keySet();
+    }
+
+    /**
+     * Reverse lookup — finds the faculty username whose mapped hostname
+     * matches the given PC hostname (case-insensitive).
+     *
+     * @param hostname the current PC hostname (e.g. "HP", "LAPTOP-UHBD48G0")
+     * @return the matching faculty username, or null if no match
+     */
+    public static String getFacultyForHostname(String hostname) {
+        if (hostname == null)
+            return null;
+        for (Map.Entry<String, String> entry : HOSTNAMES.entrySet()) {
+            if (entry.getValue().equalsIgnoreCase(hostname.trim())) {
+                return entry.getKey();
+            }
+        }
+        return null;
     }
 
     // ══════════════════════════════════════════════

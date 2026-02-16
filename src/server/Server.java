@@ -216,13 +216,30 @@ public class Server {
      * If double-clicked (no args), shows a GUI chooser dialog.
      */
     public static void main(String[] args) {
-        String username;
+        String username = null;
 
-        if (args.length > 0) {
-            // Command-line mode
+        // ── Priority 1: Auto-detect hostname → match to faculty ──
+        try {
+            String detectedHostname = InetAddress.getLocalHost().getHostName();
+            String autoMatch = Protocol.getFacultyForHostname(detectedHostname);
+
+            if (autoMatch != null) {
+                username = autoMatch;
+                log("Hostname '" + detectedHostname + "' matched → auto-starting as '" + username + "'");
+            } else {
+                log("Hostname '" + detectedHostname + "' not found in faculty mappings.");
+            }
+        } catch (Exception e) {
+            log("Could not detect hostname: " + e.getMessage());
+        }
+
+        // ── Priority 2: Command-line argument ──
+        if (username == null && args.length > 0) {
             username = args[0].trim();
-        } else {
-            // GUI mode — show a faculty chooser dialog
+        }
+
+        // ── Priority 3: GUI chooser (fallback) ──
+        if (username == null) {
             try {
                 javax.swing.UIManager.setLookAndFeel(
                         javax.swing.UIManager.getSystemLookAndFeelClassName());
@@ -234,7 +251,7 @@ public class Server {
 
             String choice = (String) javax.swing.JOptionPane.showInputDialog(
                     null,
-                    "Select which faculty account to start the server as:",
+                    "No hostname match found.\nSelect which faculty account to start the server as:",
                     "LAN File Sharing — Server Setup",
                     javax.swing.JOptionPane.QUESTION_MESSAGE,
                     null,

@@ -36,8 +36,8 @@ public class SecurityUtil {
         // Just copy-paste a new line and change the values!
 
         CREDENTIALS.put("faculty1", hashPassword("pass123"));
-        CREDENTIALS.put("faculty2", hashPassword("pass456"));
-        CREDENTIALS.put("faculty3", hashPassword("pass789"));
+        CREDENTIALS.put("faculty2", hashPassword("pass123"));
+        CREDENTIALS.put("faculty3", hashPassword("pass123"));
         CREDENTIALS.put("faculty4", hashPassword("pass321"));
         CREDENTIALS.put("faculty5", hashPassword("pass654"));
 
