@@ -40,6 +40,7 @@ public class SecurityUtil {
         CREDENTIALS.put("faculty3", hashPassword("pass123"));
         CREDENTIALS.put("faculty4", hashPassword("pass321"));
         CREDENTIALS.put("faculty5", hashPassword("pass654"));
+        CREDENTIALS.put("02906", hashPassword("02906"));
 
         // ↑ Add more faculty entries above ↑
     }

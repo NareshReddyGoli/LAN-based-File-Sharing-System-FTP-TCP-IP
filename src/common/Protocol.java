@@ -59,6 +59,7 @@ public final class Protocol {
         HOSTNAMES.put("faculty3", "DESKTOP-35DPGU5");
         HOSTNAMES.put("faculty4", "FACULTY4-PC");
         HOSTNAMES.put("faculty5", "FACULTY5-PC");
+        HOSTNAMES.put("02906", "02906");
 
         // ↑ Add more faculty hostname mappings above ↑
     }
