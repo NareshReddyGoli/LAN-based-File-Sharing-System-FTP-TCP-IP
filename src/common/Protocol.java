@@ -31,8 +31,8 @@ public final class Protocol {
     /** Buffer size for file transfers (8 KB) */
     public static final int BUFFER_SIZE = 8192;
 
-    /** Socket timeout in milliseconds (30 seconds) */
-    public static final int SOCKET_TIMEOUT_MS = 30_000;
+    /** Socket timeout in milliseconds (60 seconds) */
+    public static final int SOCKET_TIMEOUT_MS = 60_000;
 
     // ══════════════════════════════════════════════
     // Paths
@@ -60,6 +60,16 @@ public final class Protocol {
         HOSTNAMES.put("faculty4", "FACULTY4-PC");
         HOSTNAMES.put("faculty5", "FACULTY5-PC");
         HOSTNAMES.put("02906", "02906");
+        HOSTNAMES.put("02907", "02907");
+        HOSTNAMES.put("02908", "02908");
+        HOSTNAMES.put("02909", "02909");
+        HOSTNAMES.put("02910", "02910");
+        HOSTNAMES.put("02911", "02911");
+        HOSTNAMES.put("02912", "02912");
+        HOSTNAMES.put("02913", "02913");
+        HOSTNAMES.put("02914", "02914");
+        HOSTNAMES.put("02915", "02915");
+        HOSTNAMES.put("02194", "02194");
 
         // ↑ Add more faculty hostname mappings above ↑
     }
@@ -127,4 +137,12 @@ public final class Protocol {
     public static final String LOGOUT = "LOGOUT";
     public static final String ERROR_PREFIX = "ERROR:";
     public static final String DELIMITER = ":";
+
+    // ══════════════════════════════════════════════
+    // UDP Auto-Discovery
+    // ══════════════════════════════════════════════
+
+    public static final int DISCOVERY_PORT = 8888;
+    public static final String DISCOVER_SERVER_REQUEST = "DISCOVER_LAN_FILE_SERVER_REQ";
+    public static final String DISCOVER_SERVER_RESPONSE = "DISCOVER_LAN_FILE_SERVER_RES";
 }

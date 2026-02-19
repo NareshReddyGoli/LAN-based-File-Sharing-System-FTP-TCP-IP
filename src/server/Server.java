@@ -85,6 +85,9 @@ public class Server {
             serverSocket = new ServerSocket(Protocol.PORT);
             running = true;
 
+            // Step 3.5 — Start UDP Discovery Listener
+            new Thread(this::listenForDiscovery).start();
+
             // Step 4 — Print startup banner
             printBanner();
 
@@ -204,6 +207,41 @@ public class Server {
      */
     static void log(String message) {
         System.out.println("[" + LocalDateTime.now().format(LOG_FMT) + "] " + message);
+    }
+
+    // ──────────────────────────────────────────────
+    // UDP Discovery
+    // ──────────────────────────────────────────────
+
+    /**
+     * Listens for UDP broadcast packets from clients and responds with
+     * the server's IP address.
+     */
+    private void listenForDiscovery() {
+        try (java.net.DatagramSocket socket = new java.net.DatagramSocket(Protocol.DISCOVERY_PORT,
+                InetAddress.getByName("0.0.0.0"))) {
+            socket.setBroadcast(true);
+            byte[] buffer = new byte[1024];
+
+            log("Discovery Service started on UDP port " + Protocol.DISCOVERY_PORT);
+
+            while (running) {
+                java.net.DatagramPacket packet = new java.net.DatagramPacket(buffer, buffer.length);
+                socket.receive(packet);
+
+                String message = new String(packet.getData(), 0, packet.getLength()).trim();
+                if (Protocol.DISCOVER_SERVER_REQUEST.equals(message)) {
+                    log("Received discovery request from " + packet.getAddress().getHostAddress());
+
+                    byte[] response = Protocol.DISCOVER_SERVER_RESPONSE.getBytes();
+                    java.net.DatagramPacket sendPacket = new java.net.DatagramPacket(
+                            response, response.length, packet.getAddress(), packet.getPort());
+                    socket.send(sendPacket);
+                }
+            }
+        } catch (Exception e) {
+            log("Discovery Service Error: " + e.getMessage());
+        }
     }
 
     // ──────────────────────────────────────────────

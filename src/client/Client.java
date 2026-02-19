@@ -340,20 +340,54 @@ public class Client {
     // ══════════════════════════════════════════════
 
     private boolean login(String username, String password) {
-        try {
-            String hostname = Protocol.getHostnameForFaculty(username);
-            if (hostname == null) {
-                System.err.println("Unknown faculty: " + username);
-                return false;
-            }
+        String hostname = Protocol.getHostnameForFaculty(username);
+        if (hostname == null) {
+            System.err.println("Unknown faculty: " + username);
+            return false;
+        }
 
-            System.out.println("Connecting to " + hostname + "...");
-            socket = new Socket(hostname, Protocol.PORT);
+        // Try 1: Hostname
+        if (tryConnect(hostname, username, password)) {
+            return true;
+        }
+
+        System.out.println("Hostname connection failed. Trying Auto-Discovery...");
+
+        // Try 2: Auto-Discovery (IP)
+        String discoveredIp = discoverServerIp();
+        if (discoveredIp != null) {
+            if (tryConnect(discoveredIp, username, password)) {
+                return true;
+            }
+        }
+
+        // Try 3: Manual IP Entry (Fallback)
+        String manualIp = JOptionPane.showInputDialog(null,
+                "Could not find server automatically (likely due to different subnets).\n\n" +
+                        "Please enter the Server IP Address manually:\n(Ask the faculty for their IP, e.g. 172.25.16.1)",
+                "Connection Failed",
+                JOptionPane.QUESTION_MESSAGE);
+
+        if (manualIp != null && !manualIp.trim().isEmpty()) {
+            if (tryConnect(manualIp.trim(), username, password)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean tryConnect(String address, String username, String password) {
+        try {
+            System.out.println("Connecting to " + address + "...");
+            socket = new Socket();
+            socket.connect(new InetSocketAddress(address, Protocol.PORT), 10000); // 10s timeout
             socket.setSoTimeout(Protocol.SOCKET_TIMEOUT_MS);
+
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            // Send username + SHA-256 hash (never plain text)
+            // Send username + SHA-256 hash
             out.println(username);
             out.println(SecurityUtil.hashPassword(password));
 
@@ -361,7 +395,7 @@ public class Client {
             return Protocol.AUTH_SUCCESS.equals(response);
 
         } catch (IOException e) {
-            System.err.println("Login error: " + e.getMessage());
+            System.err.println("Connection failed to " + address + ": " + e.getMessage());
             return false;
         }
     }
@@ -617,16 +651,52 @@ public class Client {
         SwingUtilities.invokeLater(task);
     }
 
-    // ══════════════════════════════════════════════
+    // ──────────────────────────────────────────────
+    // UDP Auto-Discovery
+    // ──────────────────────────────────────────────
+
+    /**
+     * Broadcasts a UDP packet to find the server's IP address.
+     * Use this if hostname resolution fails.
+     */
+    private String discoverServerIp() {
+        System.out.println("Attempting UDP Auto-Discovery...");
+        try (DatagramSocket socket = new DatagramSocket()) {
+            socket.setBroadcast(true);
+            socket.setSoTimeout(2000); // Wait up to 2 seconds
+
+            byte[] reqData = Protocol.DISCOVER_SERVER_REQUEST.getBytes();
+            DatagramPacket reqPacket = new DatagramPacket(
+                    reqData, reqData.length, InetAddress.getByName("255.255.255.255"), Protocol.DISCOVERY_PORT);
+            socket.send(reqPacket);
+
+            byte[] resBuffer = new byte[1024];
+            DatagramPacket resPacket = new DatagramPacket(resBuffer, resBuffer.length);
+            socket.receive(resPacket);
+
+            String response = new String(resPacket.getData(), 0, resPacket.getLength()).trim();
+            if (Protocol.DISCOVER_SERVER_RESPONSE.equals(response)) {
+                String serverIp = resPacket.getAddress().getHostAddress();
+                System.out.println("Auto-Discovery Successful! Server found at: " + serverIp);
+                return serverIp;
+            }
+
+        } catch (Exception e) {
+            System.err.println("Auto-Discovery failed: " + e.getMessage());
+        }
+        return null;
+    }
+
+    // ──────────────────────────────────────────────
     // UI COMPONENT FACTORIES
-    // ══════════════════════════════════════════════
+    // ──────────────────────────────────────────────
 
     /** Creates a small uppercase field label */
     private JLabel makeFieldLabel(String text) {
         JLabel l = new JLabel(text);
         l.setFont(new Font("Segoe UI", Font.BOLD, 11));
         l.setForeground(TEXT_MEDIUM);
-        l.setAlignmentX(Component.LEFT_ALIGNMENT);
+        l.setAlignmentX(Component.CENTER_ALIGNMENT);
         return l;
     }
 
@@ -674,6 +744,7 @@ public class Client {
 
     /** Shared styling for text inputs */
     private void styleInput(JTextField tf) {
+        tf.setAlignmentX(Component.CENTER_ALIGNMENT);
         tf.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         tf.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
         tf.setPreferredSize(new Dimension(300, 42));

@@ -1,0 +1,14 @@
+1) Run this:
+Run as **Administrator**:
+
+```cmd
+netsh advfirewall firewall add rule name="LAN File Share" dir=in action=allow protocol=TCP localport=5050
+```
+2)
+
+**Port check**: `netstat -an | findstr 5050`
+
+3)
+**Network test**: `telnet FACULTY1-PC 5050`
+
+4)
